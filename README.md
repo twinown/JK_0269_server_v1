@@ -1,19 +1,13 @@
-почему у меня не сходится с ttest_ind
-def ttest(sample_1, sample_2, alternative='two-sided', alpha=.05, independent=True):
-    t_stat_distr = st.t(len(sample_1)+len(sample_2)-2)
-    se11 = sample_1.var() / len(sample_1)
-    se22 = sample_2.var() / len(sample_2)
-    t_stat = (abs(sample_2.mean()-sample_1.mean()))/np.sqrt(se11+se22)
-    #p_value = 2 * (1-t_stat_distr.cdf(abs(t_stat))) 
-    
-    if alternative == 'two-sided':
-        p_value = 2 * (1-t_stat_distr.cdf(abs(t_stat)))
-    
-    if alternative == 'left':
-        p_value = t_stat_distr.cdf(t_stat)
-    
-    if alternative == 'right':
-        p_value = 1 - t_stat_distr.cdf(t_stat) 
-    
+Есть сервис по доставке еды, который заявляет, что среднее время их доставки составляет 20 минут
 
-    return t_stat, p_value
+* Мы подняли все наши заказы у данного сервиса
+sample = np.array(
+    [10, 13, 18, 8, 14, 15, 14, 15, 10, 14, 21, 20, 18, 13, 10, 13, 11, 10, 21, 16, 18, 21, 22, 20, 25, 14, 12, 14, 11, 16, 30, \
+     29, 30, 31, 28, 28, 24, 48, 35, 50, 33, 18, 31, 22, 33, 27, 28, 44, 22, 23, 28, 23, 22, 30,27, 30, 30, 41, 26, 29, 35, 28, 27,\
+     22, 25, 33, 28, 7, 19, 15, 20, 36, 22, 17, 17, 29, 14, 31, 11, 16, 24, 13, 15 ,21, 30, 26, 19, 21, 13, 16, 29, 37, 26, 15, 21,\
+     24, 12, 27, 18, 32, 33, 47, 23, 33, 17, 19, 25, 15, 14, 20, 23, 13, 44, 33, 48, 34, 34, 28, 27, 21, 26, 44, 41
+     ])
+Постройте 95% - доверительный интервал для среднего с помощью метода Bootstrap и проверьте, действительно ли заявленная цифра соответствует действительности
+def bootstrap_conf_ints(sample: list, alpha: float):
+    
+    pass
