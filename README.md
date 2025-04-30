@@ -1,13 +1,35 @@
-Есть сервис по доставке еды, который заявляет, что среднее время их доставки составляет 20 минут
+import streamlit as st
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+import skimage
 
-* Мы подняли все наши заказы у данного сервиса
-sample = np.array(
-    [10, 13, 18, 8, 14, 15, 14, 15, 10, 14, 21, 20, 18, 13, 10, 13, 11, 10, 21, 16, 18, 21, 22, 20, 25, 14, 12, 14, 11, 16, 30, \
-     29, 30, 31, 28, 28, 24, 48, 35, 50, 33, 18, 31, 22, 33, 27, 28, 44, 22, 23, 28, 23, 22, 30,27, 30, 30, 41, 26, 29, 35, 28, 27,\
-     22, 25, 33, 28, 7, 19, 15, 20, 36, 22, 17, 17, 29, 14, 31, 11, 16, 24, 13, 15 ,21, 30, 26, 19, 21, 13, 16, 29, 37, 26, 15, 21,\
-     24, 12, 27, 18, 32, 33, 47, 23, 33, 17, 19, 25, 15, 14, 20, 23, 13, 44, 33, 48, 34, 34, 28, 27, 21, 26, 44, 41
-     ])
-Постройте 95% - доверительный интервал для среднего с помощью метода Bootstrap и проверьте, действительно ли заявленная цифра соответствует действительности
-def bootstrap_conf_ints(sample: list, alpha: float):
+st.title('Изменение четкости изображения')
+
+uploaded_file = st.file_uploader("Выберите изображение", type=["jpg", "png", "jpeg"])
+if uploaded_file is not None:
+      image = Image.open(uploaded_file)
+      st.image(image, caption="Загруженное изображение", use_column_width=True)
+      image = skimage.color.rgb2gray(image)
+      U, sing_values, V = np.linalg.svd(image)
+      U.shape, V.shape, sing_values.shape
+      S = np.zeros(shape=image.shape)
+      np.fill_diagonal(S, sing_values)
+      M = U@S@V
+      plt.imshow(M, cmap='grey')
+      top_k = st.slider(
+            "Количество сингулярных чисел")
+      trunc_U = U[:, :top_k]
+      trunc_S = S[:top_k, :top_k]
+      trunc_V = V[:top_k, :]
+      trunc_M = trunc_U@trunc_S@trunc_V
+          # Отображение результатов
+      fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+      ax[0].imshow(image, cmap='gray')
+      ax[0].set_title('Оригинал (grayscale)')
+      ax[0].axis('off')
     
-    pass
+      ax[1].imshow(trunc_M, cmap='gray')
+      ax[1].set_title(f'Сжатое (top {top_k} компонент)')
+      ax[1].axis('off')
+
