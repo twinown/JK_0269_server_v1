@@ -2,34 +2,43 @@ import streamlit as st
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-import skimage
+from skimage.color import rgb2gray
 
-st.title('Изменение четкости изображения')
+st.title('Изменение чёткости изображения с помощью SVD')
 
-uploaded_file = st.file_uploader("Выберите изображение", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("Загрузите изображение", type=["jpg", "jpeg", "png"])
+
 if uploaded_file is not None:
-      image = Image.open(uploaded_file)
-      st.image(image, caption="Загруженное изображение", use_column_width=True)
-      image = skimage.color.rgb2gray(image)
-      U, sing_values, V = np.linalg.svd(image)
-      U.shape, V.shape, sing_values.shape
-      S = np.zeros(shape=image.shape)
-      np.fill_diagonal(S, sing_values)
-      M = U@S@V
-      plt.imshow(M, cmap='grey')
-      top_k = st.slider(
-            "Количество сингулярных чисел")
-      trunc_U = U[:, :top_k]
-      trunc_S = S[:top_k, :top_k]
-      trunc_V = V[:top_k, :]
-      trunc_M = trunc_U@trunc_S@trunc_V
-          # Отображение результатов
-      fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-      ax[0].imshow(image, cmap='gray')
-      ax[0].set_title('Оригинал (grayscale)')
-      ax[0].axis('off')
-    
-      ax[1].imshow(trunc_M, cmap='gray')
-      ax[1].set_title(f'Сжатое (top {top_k} компонент)')
-      ax[1].axis('off')
+    # Открываем и отображаем оригинал
+    image_pil = Image.open(uploaded_file).convert("RGB")
+    st.image(image_pil, caption="Загруженное изображение", use_column_width=True)
+
+    # Переводим в numpy и серый формат
+    image_np = np.array(image_pil)
+    image_gray = rgb2gray(image_np)
+
+    # SVD-разложение
+    U, sing_values, Vt = np.linalg.svd(image_gray, full_matrices=False)
+
+    # Слайдер для выбора числа компонент
+    top_k = st.slider("Количество сингулярных чисел", min_value=5, max_value=min(U.shape), value=50)
+
+    # Усечённая реконструкция
+    trunc_U = U[:, :top_k]
+    trunc_S = np.diag(sing_values[:top_k])
+    trunc_V = Vt[:top_k, :]
+    truncated_image = trunc_U @ trunc_S @ trunc_V
+
+    # График до и после
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    ax[0].imshow(image_gray, cmap='gray')
+    ax[0].set_title('Оригинал (grayscale)')
+    ax[0].axis('off')
+
+    ax[1].imshow(truncated_image, cmap='gray')
+    ax[1].set_title(f'Сжатое изображение (top {top_k})')
+    ax[1].axis('off')
+
+    st.pyplot(fig)
+
 
