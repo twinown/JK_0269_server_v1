@@ -1,44 +1,22 @@
-import streamlit as st
-from PIL import Image
-import numpy as np
-import matplotlib.pyplot as plt
-from skimage.color import rgb2gray
-
-st.title('Изменение чёткости изображения с помощью SVD')
-
-uploaded_file = st.file_uploader("Загрузите изображение", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    # Открываем и отображаем оригинал
-    image_pil = Image.open(uploaded_file).convert("RGB")
-    st.image(image_pil, caption="Загруженное изображение", use_column_width=True)
-
-    # Переводим в numpy и серый формат
-    image_np = np.array(image_pil)
-    image_gray = rgb2gray(image_np)
-
-    # SVD-разложение
-    U, sing_values, Vt = np.linalg.svd(image_gray, full_matrices=False)
-
-    # Слайдер для выбора числа компонент
-    top_k = st.slider("Количество сингулярных чисел", min_value=5, max_value=min(U.shape), value=50)
-
-    # Усечённая реконструкция
-    trunc_U = U[:, :top_k]
-    trunc_S = np.diag(sing_values[:top_k])
-    trunc_V = Vt[:top_k, :]
-    truncated_image = trunc_U @ trunc_S @ trunc_V
-
-    # График до и после
-    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-    ax[0].imshow(image_gray, cmap='gray')
-    ax[0].set_title('Оригинал (grayscale)')
-    ax[0].axis('off')
-
-    ax[1].imshow(truncated_image, cmap='gray')
-    ax[1].set_title(f'Сжатое изображение (top {top_k})')
-    ax[1].axis('off')
-
-    st.pyplot(fig)
-
+standard_scaler_columns = ['RtpStateBitfield','AVProductStatesIdentifier', 'CountryIdentifier', 'CityIdentifier','OrganizationIdentifier','GeoNameIdentifier','LocaleEnglishNameIdentifier','OsBuild','OsSuite','IeVerIdentifier',
+                           'Census_OEMNameIdentifier','Census_OEMModelIdentifier','Census_ProcessorModelIdentifier','Census_PrimaryDiskTotalCapacity','Census_SystemVolumeTotalCapacity','Census_TotalPhysicalRAM','Census_InternalPrimaryDisplayResolutionHorizontal',
+                           'Census_InternalPrimaryDisplayResolutionVertical','Census_InternalBatteryNumberOfCharges','Census_OSBuildNumber','Census_OSBuildRevision','Census_OSInstallLanguageIdentifier','Census_OSUILocaleIdentifier','Census_InternalPrimaryDiagonalDisplaySizeInInches',
+                           'Census_FirmwareManufacturerIdentifier','Census_FirmwareVersionIdentifier','Wdft_RegionIdentifier']
+normalized =ColumnTransformer(
+    [
+        ('scaling_num_columns', StandardScaler(), standard_scaler_columns)
+    ],
+    verbose_feature_names_out = False,
+    remainder = 'passthrough' 
+)
+X, y = data.drop('HasDetections', axis=1), data['HasDetections']
+X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+proc_x_train = normalized.fit_transform(X_train)
+proc_x_valid = normalized.transform(X_valid)
+model = LogisticRegression(
+    penalty='elasticnet',
+    class_weight='balanced',
+    random_state=42,
+)
+model.fit(proc_x_train,y_train)
 
