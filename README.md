@@ -1,3 +1,3 @@
-nan_counts = df.isna().sum()
-nan_counts = nan_counts[nan_counts > 0]  # только с пропусками
-print(nan_counts.sort_values(ascending=False))  # сортировка по убыванию
+last_col=['MSZoning','Utilities','Functional','Exterior1st','Exterior2nd','Electrical','SaleType','KitchenQual']
+for col in last_col:
+    df[col]= df[col].fillna(df[col].mode()[0])
